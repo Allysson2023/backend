@@ -13,6 +13,13 @@ app.get('/produtos', (req, res) =>{
     res.json(produtos)
 });
 
+app.post('/produtos', (req, res) => {
+    const novoProduto = req.body
+
+    produtos.push(novoProduto)
+    res.json(novoProduto)
+});
+
 app.get('/', (req, res) => {
     res.send('Api funcionando...')
 })
