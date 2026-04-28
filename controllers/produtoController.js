@@ -1,52 +1,70 @@
 const produtos = require('../models/produto');
-
+const db = require('../db');
 
 // GET 
 exports.listar = (req, res) =>{
-    res.json(produtos)
+    db.query('SELECT * FROM produtos', (erro, resultado) => {
+        if (erro) {
+            console.log(erro);
+            return res.status(500).json({ erro: 'Erro no banco'});
+        }
+        res.json(resultado);
+    })
 };
 
 // POST
 exports.criar = (req, res) => {
-    const novoProduto = req.body
-    produtos.push(novoProduto)
-    res.json(novoProduto)
+    const { nome, preco } = req.body;
+
+    const sql = 'INSERT INTO produtos (nome, preco) VALUES (?, ?)';
+
+    db.query(sql, [nome, preco], (erro, resultado) => {
+        if(erro) {
+            console.log(erro);
+            return res.status(500).json({ erro: 'Erro ao inserir'})
+        }
+        res.json({ mensagem: 'Produto criado com sucesso!'});
+    })
 };
 
 // DELETE
-exports.delete = (req, res) => {
+exports.deletar = (req, res) => {
     const id = parseInt(req.params.id);
 
-    const index = produtos.findIndex(p=> p.id === id);
+    const sql = 'DELETE FROM produtos WHERE id = ?';
 
+    db.query(sql, [id], ( erro, resultado ) => {
+        if (erro) {
+            console.error(erro);
+            return res.status(500).json({
+                erro: 'Erro ao deletar'
+            })
+        }
+        if(resultado.affectedRows === 0) {
+            return res.status(404).json({ erro: 'Produto não encontrado'});
+        }
 
-    if (index === -1){
-        return res.status(404).json({erro: 'Produto não encontrado!'})
-    }
-
-    produtos.splice(index, 1)
-
-
-    return  res.status(200).json({
-        mensagem: 'Produto deletado com sucesso!'})
+        res.json({mensagem: 'Produto deletado com sucesso'});
+    })
 };
 
 // PUT
 exports.atualizar = (req, res) => {
     const id = parseInt(req.params.id);
+    const {nome, preco} = req.body;
 
-    const produto = produtos.find( p => p.id === id)
+    const sql = 'UPDATE produtos SET nome = ?, preco = ? WHERE id =  ?';
 
-    if (!produto){
-        return res.status(404).json({
-            erro: 'Produto não encontrado!'
-        })
-    }
+    db.query(sql, [nome, preco, id], (erro, resultado) =>{
+        if (erro) {
+            console.error(erro);
+            return res.status(500).json({erro: 'Erro ao atualizar'});
+        }
 
-    const { nome, preco } = req.body;
-
-    if (nome !== undefined) produto.nome = nome;
-    if (preco !== undefined) produto.preco = preco;
-
-    return res.status(200).json(produto)
+        if (resultado.affectedRows === 0) {
+            return res.status(404).json({erro: 'Produto não encontrado'});
+        }
+        res.json({mensagem: 'Produto atualizado com sucesso!' })
+    })
+    
 }
