@@ -3,7 +3,14 @@ const db = require('../db');
 
 // GET 
 exports.listar = (req, res) =>{
-    db.query('SELECT * FROM produtos', (erro, resultado) => {
+
+    const sql = `
+        SELECT id, nome, preco,
+        CONCAT('http://localhost:3000/uploads/', imagem) AS imagem
+        FROM produtos
+    `
+
+    db.query(sql, (erro, resultado) => {
         if (erro) {
             console.log(erro);
             return res.status(500).json({ erro: 'Erro no banco'});
