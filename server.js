@@ -3,6 +3,12 @@ const cors = require('cors')
 const multer = require("multer");
 const db = require('./db');
 const path = require("path");
+const app = express();
+
+app.use(cors())
+app.use(express.json());
+
+app.use("/uploads", express.static("uploads"));
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -14,7 +20,6 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage })
 
-const app = express();
 
 app.post("/upload-produto", upload.single("imagem"), (req, res) => {
     const { nome, preco } = req.body;
@@ -38,10 +43,27 @@ app.post("/upload-produto", upload.single("imagem"), (req, res) => {
 
 });
 
-app.use(cors())
-app.use(express.json());
+app.put("/produtos/:id/imagem", upload.single("imagem"), (req, res) => {
 
-app.use("/uploads", express.static("uploads"));
+    const id = req.params.id;
+
+    const novaImagem = req.file.filename;
+
+    const sql = "UPDATE produtos SET imagem = ? WHERE id = ?";
+
+    db.query(sql, [novaImagem, id], (err, result) => {
+        if(err) {
+            return res.status(500).json(err);
+        }
+
+        res.json({
+            mensagem: "Imagem atualizada!",
+            imagem: `http://localhost:3000/uploads/${novaImagem}`
+        });
+    });
+});
+
+
 
 const produtoRoutes = require('./routes/produtoRoutes');
 
