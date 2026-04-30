@@ -1,5 +1,6 @@
 const produtos = require('../models/produto');
 const db = require('../db');
+const authMiddleware = require('../middlewares/authMiddleware');
 
 // GET 
 exports.listar = (req, res) =>{
@@ -20,7 +21,7 @@ exports.listar = (req, res) =>{
 };
 
 // POST
-exports.criar = (req, res) => {
+exports.criar = [authMiddleware, (req, res) => {
     const { nome, preco } = req.body;
 
     const sql = 'INSERT INTO produtos (nome, preco) VALUES (?, ?)';
@@ -32,7 +33,8 @@ exports.criar = (req, res) => {
         }
         res.json({ mensagem: 'Produto criado com sucesso!'});
     })
-};
+}
+]
 
 // DELETE
 exports.deletar = (req, res) => {
@@ -53,16 +55,17 @@ exports.deletar = (req, res) => {
 
         res.json({mensagem: 'Produto deletado com sucesso'});
     })
-};
+}
+
 
 // PUT
-exports.atualizar = (req, res) => {
+exports.atualizar =(req, res) => {
     const id = parseInt(req.params.id);
     const {nome, preco} = req.body;
 
     const sql = 'UPDATE produtos SET nome = ?, preco = ? WHERE id =  ?';
 
-    db.query(sql, [nome, preco, id], (erro, resultado) =>{
+    db.query(sql, [nome, preco, req.params.id], (erro, resultado) =>{
         if (erro) {
             console.error(erro);
             return res.status(500).json({erro: 'Erro ao atualizar'});

@@ -3,6 +3,7 @@ const cors = require('cors')
 const multer = require("multer");
 const db = require('./db');
 const path = require("path");
+
 const app = express();
 
 app.use(cors())
@@ -10,6 +11,14 @@ app.use(express.json());
 
 app.use("/uploads", express.static("uploads"));
 
+const authRoutes = require('./routes/authRoutes');
+app.use(authRoutes);
+
+const produtoRoutes = require('./routes/produtoRoutes');
+
+app.use(produtoRoutes);
+
+const authMiddleware = require('./middlewares/authMiddleware');
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, "uploads/");
@@ -21,7 +30,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage })
 
 
-app.post("/upload-produto", upload.single("imagem"), (req, res) => {
+app.post("/upload-produto", authMiddleware, upload.single("imagem"), (req, res) => {
     const { nome, preco } = req.body;
 
     const imagem = req.file.filename;
@@ -43,7 +52,7 @@ app.post("/upload-produto", upload.single("imagem"), (req, res) => {
 
 });
 
-app.put("/produtos/:id/imagem", upload.single("imagem"), (req, res) => {
+app.put("/produtos/:id/imagem", authMiddleware, upload.single("imagem"), (req, res) => {
 
     const id = req.params.id;
 
@@ -65,9 +74,6 @@ app.put("/produtos/:id/imagem", upload.single("imagem"), (req, res) => {
 
 
 
-const produtoRoutes = require('./routes/produtoRoutes');
-
-app.use(produtoRoutes);
 
 app.get('/', (req, res) => {
     res.send('Api funcionando...')
