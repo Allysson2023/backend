@@ -9,7 +9,7 @@ module.exports = (req, res, next) => {
         return res.status(401).json({erro: "Sem token"});
     }
 
-    const token = authHeader.split("")[1];
+    const token = authHeader.split(" ")[1];
 
     try {
         jwt.verify(token, SECRET);

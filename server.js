@@ -31,7 +31,16 @@ const upload = multer({ storage })
 
 
 app.post("/upload-produto", authMiddleware, upload.single("imagem"), (req, res) => {
+
+    console.log("CHEGOU");
+    console.log("Body:", req.body);
+    console.log("File:", req.file);
+    
+
     const { nome, preco } = req.body;
+    if (!req.file){
+        return res.status(400).json()({erro: "Imagem não enviada!"});
+    }
 
     const imagem = req.file.filename;
 
@@ -39,6 +48,7 @@ app.post("/upload-produto", authMiddleware, upload.single("imagem"), (req, res) 
 
     db.query(sql, [nome, preco, imagem], (err, result) => {
         if (err) {
+            console.log("ERRO SQL:", err);
             return res.status(500).json(err);
         }
         
