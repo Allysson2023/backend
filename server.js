@@ -30,16 +30,25 @@ const storage = multer.diskStorage({
 const upload = multer({ storage })
 
 
-app.post("/upload-produto", authMiddleware, upload.single("imagem"), (req, res) => {
+app.post("/upload-produto", 
+    authMiddleware,
+    upload.single("imagem"),  (req, res) => {
 
     console.log("CHEGOU");
     console.log("Body:", req.body);
     console.log("File:", req.file);
     
 
-    const { nome, preco } = req.body;
+    const nome = req.body?.nome;
+    const preco = req.body?.preco;
+
+    if (!nome || !preco) {
+        return res.status(400).json({ erro: "Dados enviada!" });
+
+    }
+
     if (!req.file){
-        return res.status(400).json()({erro: "Imagem não enviada!"});
+        return res.status(400).json({ erro: "Imagem não enviada!" });
     }
 
     const imagem = req.file.filename;

@@ -21,8 +21,13 @@ exports.listar = (req, res) =>{
 };
 
 // POST
-exports.criar = [authMiddleware, (req, res) => {
-    const { nome, preco } = req.body;
+exports.criar = (req, res) => {
+    const nome = req.body?.nome;
+    const preco = req.body?.preco;
+
+    if (!nome || !preco) {
+        return res.status(400).json({ erro: "Dados invalidos"});
+    }
 
     const sql = 'INSERT INTO produtos (nome, preco) VALUES (?, ?)';
 
@@ -34,7 +39,7 @@ exports.criar = [authMiddleware, (req, res) => {
         res.json({ mensagem: 'Produto criado com sucesso!'});
     })
 }
-]
+
 
 // DELETE
 exports.deletar = (req, res) => {
