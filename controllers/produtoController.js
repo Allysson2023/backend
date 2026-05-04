@@ -6,7 +6,7 @@ const authMiddleware = require('../middlewares/authMiddleware');
 exports.listar = (req, res) =>{
 
     const sql = `
-        SELECT id, nome, preco,
+        SELECT id, nome, preco, descricao, categoria,
         CONCAT('http://localhost:3000/uploads/', imagem) AS imagem
         FROM produtos
     `
@@ -22,16 +22,23 @@ exports.listar = (req, res) =>{
 
 // POST
 exports.criar = (req, res) => {
+
+    console.log("BODY:", req.body);
+    
+
     const nome = req.body?.nome;
     const preco = req.body?.preco;
+    const descricao = req.body?.descricao;
+    const categoria = req.body?.categoria;
+    const imagem = req.file?.filename;
 
     if (!nome || !preco) {
         return res.status(400).json({ erro: "Dados invalidos"});
     }
 
-    const sql = 'INSERT INTO produtos (nome, preco) VALUES (?, ?)';
+    const sql = 'INSERT INTO produtos (nome, preco, descricao, categoria, imagem) VALUES (?, ?, ?, ?, ?)';
 
-    db.query(sql, [nome, preco], (erro, resultado) => {
+    db.query(sql, [nome, preco, descricao, categoria, imagem], (erro, resultado) => {
         if(erro) {
             console.log(erro);
             return res.status(500).json({ erro: 'Erro ao inserir'})
@@ -66,11 +73,11 @@ exports.deletar = (req, res) => {
 // PUT
 exports.atualizar =(req, res) => {
     const id = parseInt(req.params.id);
-    const {nome, preco} = req.body;
+    const {nome, preco, descricao, categoria} = req.body;
 
-    const sql = 'UPDATE produtos SET nome = ?, preco = ? WHERE id =  ?';
+    const sql = 'UPDATE produtos SET nome = ?, preco = ?, descricao = ?, categoria = ? WHERE id =  ?';
 
-    db.query(sql, [nome, preco, req.params.id], (erro, resultado) =>{
+    db.query(sql, [nome, preco,descricao, categoria, req.params.id], (erro, resultado) =>{
         if (erro) {
             console.error(erro);
             return res.status(500).json({erro: 'Erro ao atualizar'});
